@@ -1,0 +1,106 @@
+//
+//
+// Build the library
+//
+//
+
+cc_defaults {
+    name: "hello-minimal-defaults",
+    host_supported: true,
+
+    // static analysis is too slow on these huge files.
+    tidy_checks: [
+        "-clang-analyzer-*",
+    ],
+
+    // NOTE the following flags,
+    //   SQLITE_TEMP_STORE=3 causes all TEMP files to go into RAM. and thats the behavior we want
+    //   SQLITE_ENABLE_FTS3   enables usage of FTS3 - NOT FTS1 or 2.
+    //   SQLITE_DEFAULT_AUTOVACUUM=1  causes the databases to be subject to auto-vacuum
+    cflags: [
+        "-DNDEBUG=1",
+        "-DHAVE_USLEEP=1",
+        "-DSQLITE_HAVE_ISNAN",
+        "-DSQLITE_DEFAULT_JOURNAL_SIZE_LIMIT=1048576",
+        "-DSQLITE_THREADSAFE=2",
+        "-DSQLITE_TEMP_STORE=3",
+        "-DSQLITE_POWERSAFE_OVERWRITE=1",
+        "-DSQLITE_DEFAULT_FILE_FORMAT=4",
+        "-DSQLITE_DEFAULT_AUTOVACUUM=1",
+        "-DSQLITE_ENABLE_MEMORY_MANAGEMENT=1",
+        "-DSQLITE_ENABLE_FTS3",
+        "-DSQLITE_ENABLE_FTS3_BACKWARDS",
+        "-DSQLITE_ENABLE_FTS4",
+        "-DSQLITE_OMIT_BUILTIN_TEST",
+        "-DSQLITE_OMIT_COMPILEOPTION_DIAGS",
+        "-DSQLITE_OMIT_LOAD_EXTENSION",
+        "-DSQLITE_DEFAULT_FILE_PERMISSIONS=0600",
+        "-DSQLITE_SECURE_DELETE",
+        "-DSQLITE_ENABLE_BATCH_ATOMIC_WRITE",
+        "-Wno-unused-parameter",
+        "-Werror",
+    ],
+
+    target: {
+        linux_glibc: {
+            cflags: ["-DHAVE_POSIX_FALLOCATE=1"],
+        },
+    },
+}
+
+cc_defaults {
+    name: "hello-defaults",
+    defaults: ["hellosqlite-minimal-defaults"],
+    target: {
+        android: {
+            cflags: [
+                "-DUSE_PREAD64",
+                "-Dfdatasync=fdatasync",
+                "-DHAVE_MALLOC_H=1",
+                "-DHAVE_MALLOC_USABLE_SIZE",
+            ],
+        },
+    },
+}
+
+//
+//
+// Build the device command line tool sqlite3
+//
+//
+
+cc_binary {
+    name: "hello",
+    defaults: ["hello-defaults"],
+
+    srcs: ["hello.c"],
+
+    tags: ["debug"],
+
+    target: {
+        android: {
+            shared_libs: [
+                "libsqlite",
+                "libicuuc",
+                "libicui18n",
+                "liblog",
+                "libutils",
+            ],
+            static_libs: [
+                "libicuandroid_utils",
+            ],
+        },
+        host: {
+            cflags: ["-DNO_ANDROID_FUNCS=1"],
+            static_libs: [
+                // sqlite3MemsysAlarm uses LOG()
+                "liblog",
+            ],
+        },
+
+        windows: {
+            enabled: true,
+        },
+    },
+}
+
