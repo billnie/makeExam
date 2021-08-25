@@ -1,0 +1,22 @@
+cmake_minimum_required(VERSION 2.8)
+project(Alpha)
+include_directories(../Maths/)
+include_directories(.)
+LINK_DIRECTORIES(.)
+add_executable(Alpha
+    main.cpp
+ #   /mnt/libmaths.a 
+    ../Maths/maths.h
+ )
+#ADD_LIBRARY(maths STATIC /mnt/)
+ #FIND_LIBRARY(libmaths /mnt/)
+#FIND_LIBRARY(
+#   libmaths_LIBRARIES NAMES  maths PATHS /mnt/ NO_DEFAULT_PATH
+#)
+#link_directories("/mnt/")
+
+
+#list(APPEND CMAKE_LIBRARY_PATH "/mnt/") 
+#set(CMAKE_LIBRARY_PATH "/mnt/")
+TARGET_LINK_LIBRARIES( Alpha maths ) 
+
